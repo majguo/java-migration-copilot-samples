@@ -3,7 +3,7 @@ package com.microsoft.migration.assets.worker.service;
 import com.azure.identity.DefaultAzureCredentialBuilder;
 import com.azure.storage.blob.BlobServiceClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
-import com.azure.storage.blob.models.BlobItem;
+import com.azure.storage.blob.models.BlobHttpHeaders;
 import com.azure.storage.blob.options.BlobParallelUploadOptions;
 import com.microsoft.migration.assets.worker.repository.ImageMetadataRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,9 +36,10 @@ public class S3FileProcessingService extends AbstractFileProcessingService {
 
     @Override
     public void uploadThumbnail(Path source, String key, String contentType) throws Exception {
-        blobServiceClient.getBlobContainerClient(containerName)
-                .getBlobClient(key)
-                .uploadFromFile(source.toString(), true);
+        var blobClient = blobServiceClient.getBlobContainerClient(containerName).getBlobClient(key);
+        BlobHttpHeaders headers = new BlobHttpHeaders().setContentType(contentType);
+        BlobParallelUploadOptions options = new BlobParallelUploadOptions(Files.newInputStream(source)).setHeaders(headers);
+        blobClient.uploadWithResponse(options, null, null);
 
         // Extract the original key from the thumbnail key
         String originalKey = extractOriginalKey(key);
