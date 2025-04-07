@@ -79,6 +79,15 @@ if [ $? -ne 0 ]; then
 fi
 echo "Resource group created."
 
+# Register Microsoft.DBforPostgreSQL provider and wait until completion
+echo "Registering Microsoft.DBforPostgreSQL provider..."
+az provider register --namespace Microsoft.DBforPostgreSQL --wait
+if [ $? -ne 0 ]; then
+    echo "Failed to register Microsoft.DBforPostgreSQL provider. Exiting."
+    exit 1
+fi
+echo "Microsoft.DBforPostgreSQL provider registration completed."
+
 # Create Azure PostgreSQL server with Microsoft Entra authentication enabled and database
 echo "Creating Azure PostgreSQL server with Microsoft Entra authentication and database..."
 az postgres flexible-server create \

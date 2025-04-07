@@ -87,6 +87,15 @@ if %ERRORLEVEL% neq 0 (
 )
 echo Resource group created.
 
+rem Register Microsoft.DBforPostgreSQL provider and wait until completion
+echo Registering Microsoft.DBforPostgreSQL provider...
+cmd /c az provider register --namespace Microsoft.DBforPostgreSQL --wait
+if %ERRORLEVEL% neq 0 (
+    echo Failed to register Microsoft.DBforPostgreSQL provider. Exiting.
+    exit /b 1
+)
+echo Microsoft.DBforPostgreSQL provider registration completed.
+
 rem Create Azure PostgreSQL server with Microsoft Entra authentication enabled and database
 echo Creating Azure PostgreSQL server with Microsoft Entra authentication and database...
 cmd /c az postgres flexible-server create ^
