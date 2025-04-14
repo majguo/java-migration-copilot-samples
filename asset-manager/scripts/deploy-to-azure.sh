@@ -70,15 +70,6 @@ if [ -z "$SubscriptionId" ]; then
 fi
 echo "Using Subscription ID: $SubscriptionId"
 
-# Create resource group
-echo "Creating resource group..."
-az group create --name "$ResourceGroupName" --location "$Location"
-if [ $? -ne 0 ]; then
-    echo "Failed to create resource group. Exiting."
-    exit 1
-fi
-echo "Resource group created."
-
 # Register Microsoft.DBforPostgreSQL provider and wait until completion
 echo "Registering Microsoft.DBforPostgreSQL provider..."
 az provider register --namespace Microsoft.DBforPostgreSQL --wait
@@ -87,6 +78,22 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 echo "Microsoft.DBforPostgreSQL provider registration completed."
+
+# Add Azure CLI extensions
+echo "Adding/upgrading Azure CLI extensions..."
+az extension add --name containerapp --upgrade
+az extension add --name rdbms-connect --upgrade
+az extension add --name serviceconnector-passwordless --upgrade
+echo "Azure CLI extensions added/upgraded."
+
+# Create resource group
+echo "Creating resource group..."
+az group create --name "$ResourceGroupName" --location "$Location"
+if [ $? -ne 0 ]; then
+    echo "Failed to create resource group. Exiting."
+    exit 1
+fi
+echo "Resource group created."
 
 # Create Azure PostgreSQL server with Microsoft Entra authentication enabled and database
 echo "Creating Azure PostgreSQL server with Microsoft Entra authentication and database..."

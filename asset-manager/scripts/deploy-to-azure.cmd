@@ -78,15 +78,6 @@ if not defined SubscriptionId (
 )
 echo Using Subscription ID: !SubscriptionId!
 
-rem Create resource group
-echo Creating resource group...
-cmd /c az group create --name %ResourceGroupName% --location %Location%
-if %ERRORLEVEL% neq 0 (
-    echo Failed to create resource group. Exiting.
-    exit /b 1
-)
-echo Resource group created.
-
 rem Register Microsoft.DBforPostgreSQL provider and wait until completion
 echo Registering Microsoft.DBforPostgreSQL provider...
 cmd /c az provider register --namespace Microsoft.DBforPostgreSQL --wait
@@ -95,6 +86,22 @@ if %ERRORLEVEL% neq 0 (
     exit /b 1
 )
 echo Microsoft.DBforPostgreSQL provider registration completed.
+
+rem Add Azure CLI extensions
+echo Adding/upgrading Azure CLI extensions...
+cmd /c az extension add --name containerapp --upgrade
+cmd /c az extension add --name rdbms-connect --upgrade
+cmd /c az extension add --name serviceconnector-passwordless --upgrade
+echo Azure CLI extensions added/upgraded.
+
+rem Create resource group
+echo Creating resource group...
+cmd /c az group create --name %ResourceGroupName% --location %Location%
+if %ERRORLEVEL% neq 0 (
+    echo Failed to create resource group. Exiting.
+    exit /b 1
+)
+echo Resource group created.
 
 rem Create Azure PostgreSQL server with Microsoft Entra authentication enabled and database
 echo Creating Azure PostgreSQL server with Microsoft Entra authentication and database...
